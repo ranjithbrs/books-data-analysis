@@ -6,13 +6,23 @@
 [![Matplotlib](https://img.shields.io/badge/Matplotlib-3.8%2B-11557c.svg)](https://matplotlib.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An end-to-end **Exploratory Data Analysis (EDA)** and data cleaning project analyzing **1,000 book records** systematically extracted from [Books to Scrape](https://books.toscrape.com/) via the companion web scraping pipeline [`books-web-scraping`](https://github.com/ranjithbrs/books-web-scraping).
+> 🌟 **Turning messy bookstore data into colorful charts and clear business insights anyone can understand in 10 seconds!**
 
-This project cleans messy web-scraped data, engineers analytical attributes, uncovers pricing patterns, tests price-to-rating correlations, and presents publication-grade visual insights.
+---
+
+## 💡 What is this Project in 30 Seconds? (In Plain English)
+
+Imagine you run an online bookstore with 1,000 books. You have a big spreadsheet with titles, prices, ratings, and stock numbers, but looking at thousands of rows of numbers is confusing.
+
+**This project turns that raw data into clear, visual business answers**:
+- 💰 **Do expensive books get better ratings?** (No! Our analysis proved customer ratings are completely independent of price).
+- 🏷️ **What do most books cost?** Most books are priced evenly between £10 and £60, with the average book costing **£35.07**.
+- 📊 **Visual Charts:** Generates clean bar charts, histograms, and scatter plots that a business manager or store owner can immediately understand without reading code.
 
 ---
 
 ## 📑 Table of Contents
+- [What is this Project?](#-what-is-this-project-in-30-seconds-in-plain-english)
 - [Project Architecture](#-project-architecture)
 - [Key Analytical Findings](#-key-analytical-findings)
 - [Visual Insights](#-visual-insights)
