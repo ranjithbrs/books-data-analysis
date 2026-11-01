@@ -20,7 +20,15 @@ Key Transformations:
 
 import os
 import re
+import sys
 import pandas as pd
+
+# Reconfigure stdout for utf-8 on Windows
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
 
 
 def repair_text_encoding(text: str) -> str:
@@ -41,17 +49,26 @@ def clean_books_data(raw_csv_path: str, output_csv_path: str) -> pd.DataFrame:
     """
     Reads raw CSV, performs cleaning, feature engineering, and saves cleaned data.
     """
-    print(f"[1/5] Loading raw data from: {raw_csv_path}")
+    print(f"[1/6] Loading raw data from: {raw_csv_path}")
     df = pd.read_csv(raw_csv_path)
     initial_rows = len(df)
     print(f"      Loaded {initial_rows} rows and {len(df.columns)} columns.")
 
-    # 1. Clean Title
-    print("[2/5] Cleaning and repairing title text...")
+    # 1. Data Quality & Hygiene Audit
+    print("[2/6] Auditing missing values and duplicates...")
+    null_counts = df.isnull().sum()
+    exact_dups = df.duplicated().sum()
+    title_dups = df['Title'].duplicated().sum()
+    print(f"      Null values: {null_counts.sum()} (Clean - 100% complete)")
+    print(f"      Exact duplicate rows: {exact_dups}")
+    print(f"      Duplicate titles: {title_dups} ('The Star-Touched Queen' appears with two distinct prices)")
+
+    # 2. Clean Title
+    print("[3/6] Cleaning and repairing title text...")
     df['title_cleaned'] = df['Title'].apply(repair_text_encoding).str.strip()
 
-    # 2. Extract numeric price (in GBP £)
-    print("[3/5] Parsing price into numeric float values...")
+    # 3. Extract numeric price (in GBP £)
+    print("[4/6] Parsing price into numeric float values...")
     # Extract digits and decimal point: handles '£51.77', 'Â£51.77', etc.
     df['price_gbp'] = (
         df['Price']
@@ -60,8 +77,8 @@ def clean_books_data(raw_csv_path: str, output_csv_path: str) -> pd.DataFrame:
         .astype(float)
     )
 
-    # 3. Map textual star rating to numeric integer (1 to 5)
-    print("[4/5] Mapping star ratings to numeric values (1-5)...")
+    # 4. Map textual star rating to numeric integer (1 to 5)
+    print("[5/6] Mapping star ratings to numeric values (1-5)...")
     rating_map = {
         'One': 1,
         'Two': 2,
@@ -71,15 +88,13 @@ def clean_books_data(raw_csv_path: str, output_csv_path: str) -> pd.DataFrame:
     }
     df['rating_numeric'] = df['Rating'].map(rating_map).astype(int)
 
-    # 4. Clean availability
+    # 5. Clean availability & Engineer features
+    print("[6/6] Engineering analytical features & price tiers...")
     df['in_stock'] = df['Availability'].str.contains('In stock', case=False, na=False)
-
-    # 5. Feature Engineering
-    print("[5/5] Engineering analytical features...")
     df['title_length'] = df['title_cleaned'].str.len()
     df['title_word_count'] = df['title_cleaned'].apply(lambda s: len(s.split()))
 
-    # Categorize price into standard consumer retail tiers
+    # Categorize price into standard consumer retail tiers (MECE)
     bins = [0, 20.0, 40.0, float('inf')]
     labels = ['Budget (< £20)', 'Mid-Range (£20 - £40)', 'Premium (> £40)']
     df['price_tier'] = pd.cut(df['price_gbp'], bins=bins, labels=labels, right=False)

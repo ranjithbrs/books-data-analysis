@@ -15,10 +15,18 @@ Visualizations:
 """
 
 import os
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+# Ensure UTF-8 output on Windows
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
 
 # Set professional visualization style
 sns.set_theme(style="whitegrid", font="sans-serif")
