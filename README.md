@@ -21,7 +21,7 @@ This project cleans messy web-scraped data, audits data hygiene (missing values 
 Imagine you run an online bookstore with 1,000 books. You have a big spreadsheet with titles, prices, ratings, and stock numbers, but looking at thousands of rows of numbers is confusing.
 
 **This project turns that raw data into clear, visual business answers**:
-- 💰 **Do expensive books get better ratings?** (No! Our analysis proved customer ratings are completely independent of price).
+- 💰 **Do expensive books get better ratings?** (No! Our analysis shows a very weak observed linear association between price and rating, r = 0.028).
 - 🏷️ **What do most books cost?** Most books are priced evenly between £10 and £60, with the average book costing **£35.07**.
 - 📊 **Visual Charts:** Generates clean bar charts, histograms, and scatter plots that a business manager or store owner can immediately understand without reading code.
 
@@ -54,7 +54,7 @@ Raw Web Data (1,000 Rows x 4 Cols)
  Automated Validation Suite (src/validate_data.py)
    ├── Dimension check: exactly 1,000 records across 50 catalog pages
    ├── Null value audit: 0 missing cells (100% complete)
-   └── Duplication check: 0 exact duplicate rows, 1 legitimate multi-edition title
+   └── Duplication check: 0 exact duplicate rows, 1 repeated title with distinct prices
            │
            ▼
  Data Cleaning Pipeline (src/clean_data.py)
@@ -81,7 +81,7 @@ Jupyter EDA Notebook         Publication Figures
 | :--- | :--- | :--- |
 | **Catalog Price Range** | **£10.00 – £59.99** | Continuous uniform price distribution with zero outliers. |
 | **Average & Median Price** | **Mean: £35.07** \| **Median: £35.98** | Highly symmetrical distribution (Mean $\approx$ Median). |
-| **Price vs. Rating Correlation** | **Pearson $r = 0.028$ (Near Zero)** | **Disproved assumption:** Higher customer ratings do NOT correlate with higher retail prices. |
+| **Price vs. Rating Correlation** | **Pearson $r = 0.028$ (Very Weak)** | **Observation:** Weak observed linear association; higher customer ratings do not correspond to higher retail prices in this catalog. |
 | **Market Segment Breakdown** | Premium: **40.3%** \| Mid-Range: **40.1%** \| Budget: **19.6%** | Over 80% of books fall into mid and premium price brackets (£20–£60). |
 | **Rating Balance** | 1★ (22.6%), 2★ (19.6%), 3★ (20.3%), 4★ (17.9%), 5★ (19.6%) | Balanced rating distribution across all 5 tiers (~18% to 23% per tier). |
 | **Most Expensive Title** | *The Perfect Play (Play by Play #1)* — **£59.99** (Rated 3★) | Premium-priced title with average satisfaction. |
@@ -101,7 +101,7 @@ Jupyter EDA Notebook         Publication Figures
   - *Title:* `"The Star-Touched Queen"`
   - *Listing 1 (Row 236):* Price = **£46.02**, Rating = **Five**, Status = **In stock**
   - *Listing 2 (Row 358):* Price = **£32.30**, Rating = **Five**, Status = **In stock**
-  - *Resolution:* Both records are retained. They represent separate product listings on the source platform (different pricing structures, bindings, or editions) rather than a scraper artifact.
+  - *Resolution:* Both records are retained. They represent two distinct catalog listings with different prices on the source platform, without asserting why.
 
 ### 3. Price Conversion & Validation
 - Prices extracted using regular expression `r'(\d+\.\d+)'` to strip non-ASCII artifacts (`Â£`) and isolate decimal amounts as `float64`.
@@ -142,7 +142,7 @@ A side-by-side comparison of the catalog extremes.
 ## 📈 Strategic Business Recommendations
 
 1. **De-Link Rating from Pricing Power:**  
-   Because customer star rating has near-zero correlation with price ($r = 0.028$), retail merchandising teams should not assume higher-priced books provide higher satisfaction. Search rankings and recommendation algorithms should evaluate quality metrics independently of price.
+   Because customer star rating has a very weak observed linear association with price ($r = 0.028$), retail merchandising teams should not assume higher-priced books provide higher satisfaction. Search rankings and recommendation algorithms should evaluate quality metrics separately from price.
 2. **Promote Gateway Loss-Leader Titles:**  
    High-satisfaction, low-cost titles like *An Abundance of Katherines* (£10.00, 5★) and *Greek Mythic History* (£10.23, 5★) should be positioned prominently on landing pages and introductory email campaigns to drive customer acquisition.
 3. **Dynamic Value-Based Re-pricing:**  
@@ -284,7 +284,7 @@ If you wish to execute the notebook interactively:
 
 1. **Defensive Encoding Normalization**: Web-scraped content frequently mixes byte interpretations (e.g. UTF-8 multi-byte characters like smart quotes `’` misread as Windows-1252 `â€™`). Handled gracefully through bidirectional byte decoding (`latin1` $\rightarrow$ `utf-8`).
 2. **Robust Currency Parsing**: Extracted clean floating-point numbers via regular expressions (`r'(\d+\.\d+)'`), insulating the pipeline from currency symbol rendering quirks.
-3. **Statistical Independence Verification**: Confirmed that customer ratings and prices operate independently ($r = 0.028$), an essential finding when building downstream recommendation models or market analyses.
+3. **Weak Observed Linear Association**: Observed a very weak linear association between price and rating ($r = 0.028$), demonstrating that higher-priced titles do not systematically correspond to higher customer ratings in this catalog.
 4. **Reproducible Pipeline**: Structured raw versus processed data directories according to industry standard data engineering workflows.
 
 ---

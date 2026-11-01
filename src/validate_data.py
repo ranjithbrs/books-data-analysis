@@ -84,7 +84,7 @@ def run_validation():
 
     prices_for_dup = title_dups['price_gbp'].tolist()
     assert len(set(prices_for_dup)) == 2, f"Duplicate titles share identical prices: {prices_for_dup}"
-    print(f"  --> PASS: 0 exact duplicate rows. 1 legitimate multi-edition title documented: {dup_titles[0]} (Prices: £{prices_for_dup[0]:.2f}, £{prices_for_dup[1]:.2f}).")
+    print(f"  --> PASS: 0 exact duplicate rows. 1 repeated title documented as two distinct catalog listings with different prices: {dup_titles[0]} (Prices: £{prices_for_dup[0]:.2f}, £{prices_for_dup[1]:.2f}).")
     passed_checks += 1
 
     # ---------------------------------------------------------
@@ -129,13 +129,21 @@ def run_validation():
     passed_checks += 1
 
     # ---------------------------------------------------------
-    # Check 7: Feature Engineering Sanity
+    # Check 7: Feature Engineering & Availability Consistency
     # ---------------------------------------------------------
-    print("\n[Check 7/7] Validating engineered features (title length & word count)...")
+    print("\n[Check 7/7] Validating engineered features and availability conversion...")
     assert (df_proc['title_length'] > 0).all(), "Found empty titles!"
     assert (df_proc['title_word_count'] > 0).all(), "Found titles with zero word count!"
-    assert df_proc['in_stock'].all(), "Found books flagged as out of stock!"
-    print(f"  --> PASS: Feature engineering checks validated. 100% of books are in stock.")
+    
+    expected_stock = (
+        df_raw['Availability']
+        .str.contains('In stock', case=False, na=False)
+    )
+    assert (
+        df_proc['in_stock'].astype(bool).reset_index(drop=True)
+        == expected_stock.reset_index(drop=True)
+    ).all(), "Availability conversion does not match raw data!"
+    print(f"  --> PASS: Feature engineering validated and availability accurately reflects raw records.")
     passed_checks += 1
 
     print("\n" + "=" * 65)

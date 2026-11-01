@@ -13,7 +13,7 @@
 This report delivers a thorough data evaluation and business analysis of 1,000 commercial book listings systematically extracted from the *Books to Scrape* catalog. The objective is to transform raw, semi-structured web crawl data into an enterprise-grade analytical dataset, evaluate catalog health, test pricing hypotheses, and provide actionable commercial merchandising recommendations.
 
 ### Core Business Takeaway
-> **Key Finding:** Book price and customer star rating exhibit **zero empirical correlation** ($r = 0.028$). A 5-star book is no more expensive than a 1-star book (mean price £35.37 vs £34.56). This demonstrates that within this retail catalog, price cannot serve as a heuristic for product quality or satisfaction. Retailers must decouple pricing algorithms from star ratings and instead leverage top-rated low-cost titles as acquisition drivers.
+> **Key Finding:** Book price and customer star rating exhibit a **very weak observed linear association** ($r = 0.028$). A 5-star book is virtually identical in average price to a 1-star book (mean price £35.37 vs £34.56). In this catalog, price does not serve as a practical proxy for rating or customer satisfaction. Retailers should not rely on price as a quality heuristic and can instead leverage top-rated low-cost titles as acquisition drivers.
 
 ---
 
@@ -40,7 +40,7 @@ A programmatic null scan confirms **zero missing values** across both the raw (`
   - Title: *"The Star-Touched Queen"*
   - Record #1 (Row 236): Price **£46.02**, Rating **5 Stars**, Availability **In stock**
   - Record #2 (Row 358): Price **£32.30**, Rating **5 Stars**, Availability **In stock**
-  - **Handling Decision:** Both records are retained. They represent separate product listings on the source platform (differentiated by pricing tier, edition, or binding), rather than an extraction artifact.
+  - **Handling Decision:** Both records are retained. They represent two distinct catalog listings with different prices on the source platform, without asserting why.
 
 ### 3.3 Character Encoding Normalization
 Web-scraped text strings frequently present character set mismatches (Mojibake) where UTF-8 characters are misread as Windows-1252 (e.g., apostrophes `’` rendered as `â€™`).
@@ -86,11 +86,11 @@ Float Price                 ──► MECE Binning     ──► Consumer Retail
 
 ---
 
-### 5.3 Price vs. Rating: The Quality-Price Independence Paradox
+### 5.3 Price vs. Rating: Observed Linear Association
 ![Price by Rating Boxplot](figures/03_price_by_rating_boxplot.png)
 
 ```
-Pearson Correlation Coefficient: r = +0.028 (Statistically Independent)
+Pearson Correlation Coefficient: r = +0.028 (Very Weak Linear Association)
 ```
 
 | Star Rating | Book Count | Mean Price (£) | Median Price (£) | Std Dev (£) | Min Price (£) | Max Price (£) |
@@ -140,7 +140,7 @@ High-rated, low-cost titles like *An Abundance of Katherines* (£10.00, 5★) an
 Currently, books like *Civilization and Its Discontents* carry a premium price tag (£59.95) despite low 2-star ratings. Implementing value-based markdown strategies (e.g., discounting 1-star and 2-star premium books by 15–25%) can accelerate inventory turnover without hurting catalog prestige.
 
 ### 3. Recommendation Engine Guardrails
-Because rating and price are statistically uncorrelated ($r = 0.028$), search and recommendation algorithms must not rank items based on price assuming higher cost equals higher satisfaction. Quality signals (ratings, review velocity) should remain independent of monetary tiers.
+Given the very weak observed linear association between price and rating ($r = 0.028$), search and recommendation algorithms should not assume higher cost equals higher satisfaction. Quality signals (ratings, review velocity) should be evaluated separately from monetary tiers.
 
 ### 4. Assortment Diversification
 With only 19.6% of titles under £20, the store has an assortment gap in entry-level consumer impulse purchases. Expanding titles in the £5–£15 range will broaden the top of the sales funnel.
@@ -152,7 +152,7 @@ With only 19.6% of titles under £20, the store has an assortment gap in entry-l
 The project includes an automated test harness (`src/validate_data.py`) validating all pipeline assertions:
 - [x] Record count verification: exactly 1,000 rows across raw and processed datasets.
 - [x] Null audit: zero missing values across all features.
-- [x] Duplicate audit: zero exact duplicate rows; verified single multi-edition title.
+- [x] Duplicate audit: zero exact duplicate rows; verified single repeated title with distinct prices.
 - [x] Numerical conversion: strictly float64 bounded between £10.00 and £59.99.
 - [x] Rating mapping: 100% 1-to-1 consistency between string and integer representations.
 - [x] MECE segmentation: Budget (196), Mid-Range (401), Premium (403) summing to 1,000.
