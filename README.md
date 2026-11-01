@@ -4,6 +4,7 @@
 [![Pandas](https://img.shields.io/badge/Pandas-3.0%2B-150458.svg?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
 [![Seaborn](https://img.shields.io/badge/Seaborn-0.13%2B-4c72b0.svg)](https://seaborn.pydata.org/)
 [![Matplotlib](https://img.shields.io/badge/Matplotlib-3.8%2B-11557c.svg)](https://matplotlib.org/)
+[![CI Pipeline](https://github.com/ranjithbrs/books-data-analysis/actions/workflows/ci.yml/badge.svg)](https://github.com/ranjithbrs/books-data-analysis/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > 🌟 **Turning messy bookstore data into colorful charts and clear business insights anyone can understand in 10 seconds!**
