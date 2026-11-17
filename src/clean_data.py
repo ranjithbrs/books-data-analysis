@@ -30,6 +30,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
     except AttributeError:
         pass
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def repair_text_encoding(text: str) -> str:
     """
@@ -40,7 +42,7 @@ def repair_text_encoding(text: str) -> str:
         return text
     try:
         # Re-encode as latin1 and decode as utf-8
-        return text.encode('latin1').decode('utf-8')
+        return text.encode('latin1').decode('utf-8').strip()
     except (UnicodeEncodeError, UnicodeDecodeError):
         return text.strip()
 
@@ -69,13 +71,12 @@ def clean_books_data(raw_csv_path: str, output_csv_path: str) -> pd.DataFrame:
 
     # 3. Extract numeric price (in GBP £)
     print("[4/6] Parsing price into numeric float values...")
-    # Extract digits and decimal point: handles '£51.77', 'Â£51.77', etc.
-    df['price_gbp'] = (
-        df['Price']
-        .astype(str)
-        .str.extract(r'(\d+\.\d+)')[0]
-        .astype(float)
-    )
+    # Extract numeric amount (handles '£51.77', 'Â£51.77', '£10', etc.)
+    extracted_prices = df['Price'].astype(str).str.extract(r'(\d+(?:\.\d+)?)')[0]
+    if extracted_prices.isnull().any():
+        invalid = df[extracted_prices.isnull()]['Price'].tolist()
+        raise ValueError(f"Failed to extract numeric price from values: {invalid}")
+    df['price_gbp'] = extracted_prices.astype(float)
 
     # 4. Map textual star rating to numeric integer (1 to 5)
     print("[5/6] Mapping star ratings to numeric values (1-5)...")
@@ -86,7 +87,11 @@ def clean_books_data(raw_csv_path: str, output_csv_path: str) -> pd.DataFrame:
         'Four': 4,
         'Five': 5
     }
-    df['rating_numeric'] = df['Rating'].map(rating_map).astype(int)
+    mapped_ratings = df['Rating'].astype(str).str.strip().map(rating_map)
+    if mapped_ratings.isnull().any():
+        unmapped = df[mapped_ratings.isnull()]['Rating'].unique().tolist()
+        raise ValueError(f"Encountered unexpected rating values: {unmapped}")
+    df['rating_numeric'] = mapped_ratings.astype(int)
 
     # 5. Clean availability & Engineer features
     print("[6/6] Engineering analytical features & price tiers...")
@@ -125,12 +130,11 @@ def clean_books_data(raw_csv_path: str, output_csv_path: str) -> pd.DataFrame:
 
 
 if __name__ == '__main__':
-    raw_path = os.path.join('data', 'raw', 'books_all_pages.csv')
-    # Fallback to current directory if running standalone without data/ folder
+    raw_path = os.path.join(PROJECT_ROOT, 'data', 'raw', 'books_all_pages.csv')
     if not os.path.exists(raw_path):
-        raw_path = 'books_all_pages.csv'
+        raw_path = os.path.join(PROJECT_ROOT, 'books_all_pages.csv')
 
-    processed_path = os.path.join('data', 'processed', 'books_cleaned.csv')
+    processed_path = os.path.join(PROJECT_ROOT, 'data', 'processed', 'books_cleaned.csv')
     cleaned_df = clean_books_data(raw_path, processed_path)
 
     # Display concise summary for validation

@@ -21,15 +21,17 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
     except AttributeError:
         pass
 
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
 # Load cleaned data (fallback to cleaning if not generated yet)
-cleaned_file = os.path.join("data", "processed", "books_cleaned.csv")
+cleaned_file = os.path.join(PROJECT_ROOT, "data", "processed", "books_cleaned.csv")
 
 if not os.path.exists(cleaned_file):
     print("Cleaned file not found. Running data cleaning pipeline first...")
     from src.clean_data import clean_books_data
-    raw_file = os.path.join("data", "raw", "books_all_pages.csv")
+    raw_file = os.path.join(PROJECT_ROOT, "data", "raw", "books_all_pages.csv")
     if not os.path.exists(raw_file):
-        raw_file = "books_all_pages.csv"
+        raw_file = os.path.join(PROJECT_ROOT, "books_all_pages.csv")
     df = clean_books_data(raw_file, cleaned_file)
 else:
     df = pd.read_csv(cleaned_file)

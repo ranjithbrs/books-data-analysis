@@ -13,6 +13,7 @@ Checks Performed:
 4. Price Range & Data Type Sanity Checks
 5. Star Rating Mapping & Ordinal Consistency (1 to 5)
 6. MECE Segmentation Validation (Price Tiers)
+7. Feature Engineering & Availability Consistency
 """
 
 import os
@@ -26,17 +27,19 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
     except AttributeError:
         pass
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def run_validation():
     print("=" * 65)
     print("RUNNING DATA QUALITY & INTEGRITY VALIDATION SUITE")
     print("=" * 65)
 
-    raw_path = os.path.join("data", "raw", "books_all_pages.csv")
+    raw_path = os.path.join(PROJECT_ROOT, "data", "raw", "books_all_pages.csv")
     if not os.path.exists(raw_path):
-        raw_path = "books_all_pages.csv"
+        raw_path = os.path.join(PROJECT_ROOT, "books_all_pages.csv")
 
-    proc_path = os.path.join("data", "processed", "books_cleaned.csv")
+    proc_path = os.path.join(PROJECT_ROOT, "data", "processed", "books_cleaned.csv")
 
     passed_checks = 0
     total_checks = 7
@@ -46,7 +49,10 @@ def run_validation():
     # ---------------------------------------------------------
     print("\n[Check 1/7] Verifying file existence and record counts...")
     assert os.path.exists(raw_path), f"Raw dataset not found at {raw_path}"
-    assert os.path.exists(proc_path), f"Processed dataset not found at {proc_path}"
+    assert os.path.exists(proc_path), (
+        f"Processed dataset not found at {proc_path}. "
+        "Please run 'python src/clean_data.py' first!"
+    )
 
     df_raw = pd.read_csv(raw_path)
     df_proc = pd.read_csv(proc_path)

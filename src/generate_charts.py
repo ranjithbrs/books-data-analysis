@@ -16,6 +16,11 @@ Visualizations:
 
 import os
 import sys
+import tempfile
+
+# Ensure Matplotlib config directory is writable before importing matplotlib
+os.environ.setdefault("MPLCONFIGDIR", tempfile.gettempdir())
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -28,6 +33,10 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
     except AttributeError:
         pass
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FIGURES_DIR = os.path.join(PROJECT_ROOT, "figures")
+os.makedirs(FIGURES_DIR, exist_ok=True)
+
 # Set professional visualization style
 sns.set_theme(style="whitegrid", font="sans-serif")
 plt.rcParams.update({
@@ -39,13 +48,14 @@ plt.rcParams.update({
     "figure.titlesize": 16,
 })
 
-FIGURES_DIR = "figures"
-os.makedirs(FIGURES_DIR, exist_ok=True)
 
-
-def load_data(csv_path="data/processed/books_cleaned.csv") -> pd.DataFrame:
+def load_data(csv_path=None) -> pd.DataFrame:
+    if csv_path is None:
+        csv_path = os.path.join(PROJECT_ROOT, "data", "processed", "books_cleaned.csv")
     if not os.path.exists(csv_path):
-        raise FileNotFoundError(f"Cleaned dataset not found at {csv_path}. Please run clean_data.py first.")
+        raise FileNotFoundError(
+            f"Cleaned dataset not found at {csv_path}. Please run 'python src/clean_data.py' first."
+        )
     return pd.read_csv(csv_path)
 
 
@@ -236,7 +246,15 @@ def plot_top_books(df: pd.DataFrame):
     )
     for bar in bars1:
         w = bar.get_width()
-        ax1.text(w - 6, bar.get_y() + 0.25, f"£{w:.2f}", color="white", weight="bold")
+        ax1.text(
+            w - 1.5,
+            bar.get_y() + bar.get_height() / 2,
+            f"£{w:.2f}",
+            color="white",
+            weight="bold",
+            va="center",
+            ha="right",
+        )
     ax1.set_title("Top 5 Most Expensive Books", weight="bold")
     ax1.set_xlabel("Price (£)")
     ax1.set_xlim(0, 65)
@@ -250,7 +268,15 @@ def plot_top_books(df: pd.DataFrame):
     )
     for bar in bars2:
         w = bar.get_width()
-        ax2.text(w + 0.5, bar.get_y() + 0.25, f"£{w:.2f}", color="#27ae60", weight="bold")
+        ax2.text(
+            w + 0.5,
+            bar.get_y() + bar.get_height() / 2,
+            f"£{w:.2f}",
+            color="#27ae60",
+            weight="bold",
+            va="center",
+            ha="left",
+        )
     ax2.set_title("Top 5 Most Affordable Books", weight="bold")
     ax2.set_xlabel("Price (£)")
     ax2.set_xlim(0, 20)
