@@ -9,7 +9,7 @@
 
 > 🌟 **Turning messy bookstore data into colorful charts and clear business insights anyone can understand in 10 seconds!**
 
-An end-to-end **Exploratory Data Analysis (EDA)** and data cleaning project analyzing **1,000 book records** systematically extracted from [Books to Scrape](https://books.toscrape.com/) via the companion web scraping pipeline [ooks-web-scraping](https://github.com/ranjithbrs/books-web-scraping).
+An end-to-end **Exploratory Data Analysis (EDA)** and data cleaning project analyzing **1,000 book records** systematically extracted from [Books to Scrape](https://books.toscrape.com/) via the companion web scraping pipeline [books-web-scraping](https://github.com/ranjithbrs/books-web-scraping).
 
 This project cleans messy web-scraped data, audits data hygiene (missing values & duplicate titles), engineers analytical attributes, validates pricing models, and delivers actionable e-commerce business recommendations.
 

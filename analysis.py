@@ -72,7 +72,7 @@ for stars, p in avg_price_by_rating.items():
     print(f"   * {stars} Star Average Price: GBP {p:.2f}")
 
 # 5. Price Tiers Breakdown
-print("\n5. MARKET SEGMENTATION (PRICE TIERS):")
+print("\n5. PRICE TIERS (BUDGET, MID-RANGE, PREMIUM):")
 tier_counts = df['price_tier'].value_counts()
 for tier, count in tier_counts.items():
     pct = (count / len(df)) * 100

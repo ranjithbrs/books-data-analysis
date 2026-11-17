@@ -12,7 +12,7 @@ Checks Performed:
 3. Exact Row Duplicates & Title-Level Duplicate Audit
 4. Price Range & Data Type Sanity Checks
 5. Star Rating Mapping & Ordinal Consistency (1 to 5)
-6. MECE Segmentation Validation (Price Tiers)
+6. Price Tier Segmentation (Budget, Mid-Range, Premium)
 7. Feature Engineering & Availability Consistency
 """
 
@@ -70,7 +70,7 @@ def run_validation():
     proc_nulls = df_proc.isnull().sum().sum()
     assert raw_nulls == 0, f"Raw data has {raw_nulls} null values!"
     assert proc_nulls == 0, f"Processed data has {proc_nulls} null values!"
-    print(f"  --> PASS: Zero nulls found across both raw and processed datasets.")
+    print("  --> PASS: No missing values found in raw or processed data.")
     passed_checks += 1
 
     # ---------------------------------------------------------
@@ -90,7 +90,7 @@ def run_validation():
 
     prices_for_dup = title_dups['price_gbp'].tolist()
     assert len(set(prices_for_dup)) == 2, f"Duplicate titles share identical prices: {prices_for_dup}"
-    print(f"  --> PASS: 0 exact duplicate rows. 1 repeated title documented as two distinct catalog listings with different prices: {dup_titles[0]} (Prices: £{prices_for_dup[0]:.2f}, £{prices_for_dup[1]:.2f}).")
+    print(f"  --> PASS: 0 duplicate rows. 1 repeated title with different prices: '{dup_titles[0]}' (£{prices_for_dup[0]:.2f} and £{prices_for_dup[1]:.2f}).")
     passed_checks += 1
 
     # ---------------------------------------------------------
@@ -105,7 +105,7 @@ def run_validation():
     assert min_p == 10.00, f"Expected min price 10.00, got {min_p}"
     assert max_p == 59.99, f"Expected max price 59.99, got {max_p}"
     assert 35.0 <= mean_p <= 35.2, f"Expected mean price around 35.07, got {mean_p}"
-    print(f"  --> PASS: Price is float64, bounded strictly between £{min_p:.2f} and £{max_p:.2f} (Mean: £{mean_p:.2f}).")
+    print(f"  --> PASS: Prices are valid numbers between £{min_p:.2f} and £{max_p:.2f} (Average: £{mean_p:.2f}).")
     passed_checks += 1
 
     # ---------------------------------------------------------
@@ -119,19 +119,19 @@ def run_validation():
     for num, txt in [(1, 'One'), (2, 'Two'), (3, 'Three'), (4, 'Four'), (5, 'Five')]:
         subset = df_proc[df_proc['rating_numeric'] == num]
         assert (subset['rating_text'] == txt).all(), f"Mismatch between rating {num} and text {txt}"
-    print(f"  --> PASS: Star ratings map 1-to-1 with text ordinals across all 1,000 records.")
+    print("  --> PASS: Star ratings correctly map from text ('One' to 'Five') to numbers (1 to 5).")
     passed_checks += 1
 
     # ---------------------------------------------------------
-    # Check 6: MECE Price Tier Segmentation
+    # Check 6: Price Tier Segmentation
     # ---------------------------------------------------------
-    print("\n[Check 6/7] Validating price tier segmentation (MECE partitions)...")
+    print("\n[Check 6/7] Validating price tier segmentation...")
     expected_tiers = {'Budget (< £20)': 196, 'Mid-Range (£20 - £40)': 401, 'Premium (> £40)': 403}
     actual_tiers = df_proc['price_tier'].value_counts().to_dict()
 
     assert actual_tiers == expected_tiers, f"Tier mismatch! Expected {expected_tiers}, got {actual_tiers}"
     assert sum(actual_tiers.values()) == 1000, "Tiers do not sum to 1,000!"
-    print(f"  --> PASS: Price tiers are Mutually Exclusive & Collectively Exhaustive (Budget: 196, Mid-Range: 401, Premium: 403).")
+    print("  --> PASS: Price tiers cover all 1,000 books without overlap (Budget: 196, Mid-Range: 401, Premium: 403).")
     passed_checks += 1
 
     # ---------------------------------------------------------
@@ -149,7 +149,7 @@ def run_validation():
         df_proc['in_stock'].astype(bool).reset_index(drop=True)
         == expected_stock.reset_index(drop=True)
     ).all(), "Availability conversion does not match raw data!"
-    print(f"  --> PASS: Feature engineering validated and availability accurately reflects raw records.")
+    print("  --> PASS: Title lengths, word counts, and in-stock flags all match the raw data.")
     passed_checks += 1
 
     print("\n" + "=" * 65)

@@ -19,7 +19,6 @@ Key Transformations:
 """
 
 import os
-import re
 import sys
 import pandas as pd
 
@@ -56,14 +55,18 @@ def clean_books_data(raw_csv_path: str, output_csv_path: str) -> pd.DataFrame:
     initial_rows = len(df)
     print(f"      Loaded {initial_rows} rows and {len(df.columns)} columns.")
 
-    # 1. Data Quality & Hygiene Audit
-    print("[2/6] Auditing missing values and duplicates...")
+    # 1. Data Quality Check
+    print("[2/6] Checking missing values and duplicates...")
     null_counts = df.isnull().sum()
     exact_dups = df.duplicated().sum()
     title_dups = df['Title'].duplicated().sum()
-    print(f"      Null values: {null_counts.sum()} (Clean - 100% complete)")
+    print(f"      Missing values: {null_counts.sum()} (Clean - 100% complete)")
     print(f"      Exact duplicate rows: {exact_dups}")
-    print(f"      Duplicate titles: {title_dups} ('The Star-Touched Queen' appears with two distinct prices)")
+    if title_dups > 0:
+        dup_names = df[df['Title'].duplicated()]['Title'].unique().tolist()
+        print(f"      Duplicate titles: {title_dups} (e.g., '{dup_names[0]}' listed with different prices)")
+    else:
+        print("      Duplicate titles: 0")
 
     # 2. Clean Title
     print("[3/6] Cleaning and repairing title text...")
@@ -99,7 +102,7 @@ def clean_books_data(raw_csv_path: str, output_csv_path: str) -> pd.DataFrame:
     df['title_length'] = df['title_cleaned'].str.len()
     df['title_word_count'] = df['title_cleaned'].apply(lambda s: len(s.split()))
 
-    # Categorize price into standard consumer retail tiers (MECE)
+    # Group books into retail price tiers: Budget, Mid-Range, and Premium
     bins = [0, 20.0, 40.0, float('inf')]
     labels = ['Budget (< £20)', 'Mid-Range (£20 - £40)', 'Premium (> £40)']
     df['price_tier'] = pd.cut(df['price_gbp'], bins=bins, labels=labels, right=False)
